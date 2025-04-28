@@ -17,9 +17,9 @@ jobs:
     - name: Build the Docker image
       run: docker build ./app --file ./app/Dockerfile --tag testimage:latest
 
-     - name: Run container from image (Smoke Test)
-       run: |
-         docker run -d --name smoketest_container testimage:latest
-         sleep 5
-         docker ps -a
-         docker logs smoketest_container
+    - name: Run container from image (Smoke Test)
+      run: |
+        docker run -d --name smoketest_container testimage:latest
+        sleep 5
+        docker ps -a
+        docker logs smoketest_container
