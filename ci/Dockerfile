@@ -1,9 +1,6 @@
 # Use a minimal, lightweight Python image
 FROM python:3.11-alpine
 
-# Install dependencies needed for boto3
-RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev openssl-dev
-
 # Set working directory
 WORKDIR /app
 
