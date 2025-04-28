@@ -40,12 +40,13 @@ jobs:
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         with:
-          projectBaseDir: ./ci/app # Optional: if your code is inside a specific folder (like ./ci)
+          projectBaseDir: ./ci/app
+          args: >
+            -Dsonar.projectKey=test
+            -Dsonar.projectName=test
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_PROJECT_KEY: 'test' # Must match the project key created in SonarQube
-          SONAR_PROJECT_NAME: 'test' # Optional but recommended for clarity
 
       # Run a smoke test to verify the container runs correctly
       - name: Run smoke test
