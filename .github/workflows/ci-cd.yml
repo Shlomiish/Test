@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Image CI + SonarQube Scan
 
 on:
   push:
@@ -8,16 +8,18 @@ on:
       - '.github/workflows/**'
 
 jobs:
-  build:
+  build-and-scan:
     runs-on: ubuntu-latest
 
-    # Environment variables
     env:
       DOCKER_HUB_REPO: 'shlomi00212'
       DOCKER_IMAGE_NAME: 'hello-world-app-py'
 
     steps:
+      # Checkout the code
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Important: disable shallow clone to improve SonarQube analysis
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -28,22 +30,34 @@ jobs:
 
       # Build the Docker image
       - name: Build the Docker image
-        run: docker build ./ci --file ./ci/Dockerfile --tag hello-world-app-py:latest
+        run: docker build ./ci --file ./ci/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:latest
 
-      # Run container from image
-      - name: Run container from image
-        run: docker run -d --name hello-world-app-py hello-world-app-py:latest
+      # Run the Docker container
+      - name: Run container from the built image
+        run: docker run -d --name ${{ env.DOCKER_IMAGE_NAME }} ${{ env.DOCKER_IMAGE_NAME }}:latest
 
+      # Run SonarQube scan
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: ./ci/app # Optional: if your code is inside a specific folder (like ./ci)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_PROJECT_KEY: 'test' # Must match the project key created in SonarQube
+          SONAR_PROJECT_NAME: 'test' # Optional but recommended for clarity
+
+      # Run a smoke test to verify the container runs correctly
       - name: Run smoke test
         run: |
-          sleep 5
-          docker ps -a
-          docker logs hello-world-app-py
+          sleep 5  # Wait for the container to stabilize
+          docker ps -a  # List all containers
+          docker logs ${{ env.DOCKER_IMAGE_NAME }}  # Show logs from the running container
 
-      # Tag the Docker image with Docker Hub repository name
+      # Tag the Docker image for Docker Hub
       - name: Tag the Docker image
-        run: docker tag hello-world-app-py:latest ${{ env.DOCKER_HUB_REPO }}/hello-world-app-py:latest
+        run: docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.DOCKER_HUB_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       # Push the Docker image to Docker Hub
-      - name: Push the Docker image to Docker Hub
-        run: docker push ${{ env.DOCKER_HUB_REPO }}/hello-world-app-py:latest
+      - name: Push the Docker image
+        run: docker push ${{ env.DOCKER_HUB_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
