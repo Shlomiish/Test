@@ -1,3 +1,68 @@
+# name: Docker Image CI + SonarQube Scan
+
+# on:
+#   push:
+#     branches: ['main']
+#     paths:
+#       - 'ci/**'
+#       - '.github/workflows/**'
+
+# jobs:
+#   build-and-scan:
+#     runs-on: ubuntu-latest
+
+#     env:
+#       DOCKER_HUB_REPO: 'shlomi00212'
+#       DOCKER_IMAGE_NAME: 'hello-world-app-py'
+
+#     steps:
+#       # Checkout the code
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0 # Important: disable shallow clone to improve SonarQube analysis
+
+#       # Log in to Docker Hub
+#       - name: Log in to Docker Hub
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+#       # Build the Docker image
+#       - name: Build the Docker image
+#         run: docker build ./ci --file ./ci/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:latest
+
+#       # Run the Docker container
+#       - name: Run container from the built image
+#         run: docker run -d --name ${{ env.DOCKER_IMAGE_NAME }} ${{ env.DOCKER_IMAGE_NAME }}:latest
+
+#       # Run SonarQube scan
+#       - name: SonarQube Scan
+#         uses: SonarSource/sonarqube-scan-action@v5
+#         with:
+#           projectBaseDir: ./ci/app
+#           args: >
+#             -Dsonar.projectKey=test
+#             -Dsonar.projectName=test
+#             -Dsonar.exclusions=**/myenv/**
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+#       # Run a smoke test to verify the container runs correctly
+#       - name: Run smoke test
+#         run: |
+#           sleep 5  # Wait for the container to stabilize
+#           docker ps -a  # List all containers
+#           docker logs ${{ env.DOCKER_IMAGE_NAME }}  # Show logs from the running container
+
+#       # Tag the Docker image for Docker Hub
+#       - name: Tag the Docker image
+#         run: docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.DOCKER_HUB_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+#       # Push the Docker image to Docker Hub
+#       - name: Push the Docker image
+#         run: docker push ${{ env.DOCKER_HUB_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 name: Docker Image CI + SonarQube Scan
 
 on:
@@ -45,6 +110,14 @@ jobs:
             -Dsonar.projectKey=test
             -Dsonar.projectName=test
             -Dsonar.exclusions=**/myenv/**
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # Check SonarQube Quality Gate
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
