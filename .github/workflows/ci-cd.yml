@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'ci/**'  
+      - '.github/workflows.ci-cd.yml'
 
 jobs:
 
