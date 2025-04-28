@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'ci/**'  
-      - '.github/workflows.ci-cd.yml'
+      - '.github/workflows/ci-cd.yml'
 
 jobs:
 
@@ -20,7 +20,6 @@ jobs:
 
     - name: Run container from image (Smoke Test)
       run: |
-        echo 'kaki'
         docker run -d --name smoketest_container testimage:latest
         sleep 5
         docker ps -a
