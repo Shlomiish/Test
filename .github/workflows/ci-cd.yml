@@ -44,6 +44,7 @@ jobs:
           args: >
             -Dsonar.projectKey=test
             -Dsonar.projectName=test
+            -Dsonar.exclusions=**/myenv/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
