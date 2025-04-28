@@ -15,5 +15,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build ./app --file ./app/Dockerfile --tag testimage:$(date +%s)
+      run: docker build ./app --file ./app/Dockerfile --tag testimage:latest
 
+     - name: Run container from image (Smoke Test)
+       run: |
+         docker run -d --name smoketest_container testimage:latest
+         sleep 5
+         docker ps -a
+         docker logs smoketest_container
