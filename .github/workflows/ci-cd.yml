@@ -114,10 +114,18 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+      # Debug - find report file
+      - name: Check for report file
+        run: |
+          ls -la ./ci/app/.scannerwork/ || echo "Directory not found"
+          find ./ci -name "report-task.txt" || echo "File not found anywhere in ./ci"
+
       # Check SonarQube Quality Gate
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
+        with:
+          scanMetadataReportFile: ./ci/app/.scannerwork/report-task.txt
+          pollingTimeoutSec: 300
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
