@@ -1,0 +1,14 @@
+name: Simple Workflow Demo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  demo-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Say Hello
+        run: echo "🎉 GitHub Actions is working!"
