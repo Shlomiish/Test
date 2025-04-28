@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build ./ci/app --file ./ci/app/Dockerfile --tag testimage:latest
+      run: docker build ./ci --file ./ci/Dockerfile --tag testimage:latest
 
     - name: Run container from image (Smoke Test)
       run: |
