@@ -7,4 +7,5 @@ def hello_world():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    # Use debug=False in production
+    app.run(host='0.0.0.0', debug=False)

@@ -52,7 +52,7 @@
 #       # Run a smoke test to verify the container runs correctly
 #       - name: Run smoke test
 #         run: |
-#           sleep 5  # Wait for the container to stabilize
+#           sleep 5  #13.60.11.0 Wait for the container to stabilize
 #           docker ps -a  # List all containers
 #           docker logs ${{ env.DOCKER_IMAGE_NAME }}  # Show logs from the running container
 
@@ -84,7 +84,7 @@ jobs:
       # Checkout the code
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Important: disable shallow clone to improve SonarQube analysis
+          fetch-depth: 0 # SonarQube needs full history for blame analysis
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -109,38 +109,44 @@ jobs:
           args: >
             -Dsonar.projectKey=test
             -Dsonar.projectName=test
+            -Dsonar.sources=.
             -Dsonar.exclusions=**/myenv/**
+            -Dsonar.verbose=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # Debug - find report file
+      # Debug: Check if report file exists
       - name: Check for report file
         run: |
           ls -la ./ci/app/.scannerwork/ || echo "Directory not found"
           find ./ci -name "report-task.txt" || echo "File not found anywhere in ./ci"
 
-      # Check SonarQube Quality Gate
+      # Add a delay to ensure SonarQube has time to finish the analysis
+      - name: Wait for SonarQube analysis to complete
+        run: sleep 10 # You can adjust the sleep time if needed
+
+      # Check SonarQube Quality Gate result
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@master
         with:
           scanMetadataReportFile: ./ci/app/.scannerwork/report-task.txt
-          pollingTimeoutSec: 300
+          pollingTimeoutSec: 600 # Increased timeout to 10 minutes
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # Run a smoke test to verify the container runs correctly
+      # Smoke test to verify container works
       - name: Run smoke test
         run: |
-          sleep 5  # Wait for the container to stabilize
-          docker ps -a  # List all containers
-          docker logs ${{ env.DOCKER_IMAGE_NAME }}  # Show logs from the running container
+          sleep 5
+          docker ps -a
+          docker logs ${{ env.DOCKER_IMAGE_NAME }}
 
-      # Tag the Docker image for Docker Hub
+      # Tag the Docker image
       - name: Tag the Docker image
         run: docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.DOCKER_HUB_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
-      # Push the Docker image to Docker Hub
+      # Push the image to Docker Hub
       - name: Push the Docker image
         run: docker push ${{ env.DOCKER_HUB_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
