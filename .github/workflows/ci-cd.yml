@@ -84,7 +84,7 @@ jobs:
       # Checkout the code
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # SonarQube needs full history for blame analysis123
+          fetch-depth: 0 # SonarQube needs full history for blame analysis
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
