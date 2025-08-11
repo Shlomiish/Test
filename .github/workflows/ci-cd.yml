@@ -84,7 +84,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # חשוב לסריקת blame ב-SonarQube
+          fetch-depth: 0 # חשוב לסריקת blame ב-SonarQube
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -132,7 +132,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: http://13.60.203.56
 
-      - name: Smoke test: Check running containers and logs
+      - name: Smoke test Check running containers and logs
         run: |
           docker ps -a
           docker logs ${{ env.DOCKER_IMAGE_NAME }}
